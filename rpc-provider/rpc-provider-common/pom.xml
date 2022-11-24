@@ -11,5 +11,12 @@
 
     <artifactId>rpc-provider-common</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>io.kelin</groupId>
+            <artifactId>rpc-codec</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -1,7 +1,7 @@
 package io.kelin.rpc.provider;
 
 import io.kelin.rpc.provider.common.server.base.BaseServer;
-import io.kelin.rpc.scanner.server.RpcServiceScanner;
+import io.kelin.rpc.common.scanner.server.RpcServiceScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,8 +1,8 @@
 package io.kelin.rpc.test.scanner;
 
 import io.kelin.rpc.common.ClassScanner;
-import io.kelin.rpc.scanner.reference.RpcReferenceScanner;
-import io.kelin.rpc.scanner.server.RpcServiceScanner;
+import io.kelin.rpc.common.scanner.reference.RpcReferenceScanner;
+import io.kelin.rpc.common.scanner.server.RpcServiceScanner;
 import org.junit.Test;
 
 import java.util.List;
