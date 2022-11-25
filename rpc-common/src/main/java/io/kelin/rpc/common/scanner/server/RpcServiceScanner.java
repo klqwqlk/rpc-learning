@@ -2,6 +2,7 @@ package io.kelin.rpc.common.scanner.server;
 
 import io.kelin.rpc.annotation.RpcService;
 import io.kelin.rpc.common.ClassScanner;
+import io.kelin.rpc.common.helper.RpcServiceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,10 +37,10 @@ public class RpcServiceScanner extends ClassScanner {
                     //优先使用interfaceClass, interfaceClass的name为空，再使用interfaceClassName
 //                    TODO 后续逻辑向注册中心注册服务元数据，同时向handlerMap中记录标注了RpcService注解的类实例
 
-                     //handlerMap中的key先简单存储为serviceName+version+group,后根据实际情况处理key
-                    String serviceName = getServiceName(rpcService);
-                    String key = serviceName.concat(rpcService.version()).concat(rpcService.group());
-                    handlerMap.put(key,clazz.newInstance());
+                     //handlerMap中的key=服务名称#服务版本#服务分组
+                     String serviceName = getServiceName(rpcService);
+                     String key = RpcServiceHelper.buildServiceKey(serviceName, rpcService.version(), rpcService.group());
+                     handlerMap.put(key,clazz.newInstance());
 //                    LOGGER.info("当前标注了@RpcService注解的类实例名称===>>> " + clazz.getName());
 //                    LOGGER.info("@RpcService注解上标注的属性信息如下：");
 //                    LOGGER.info("interfaceClass===>>> " + rpcService.interfaceClass().getName());
