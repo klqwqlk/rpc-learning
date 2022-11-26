@@ -1,9 +1,9 @@
 package io.kelin.rpc.provider.common.handler;
 
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.util.JSONPObject;
+
 import io.kelin.rpc.common.helper.RpcServiceHelper;
 import io.kelin.rpc.common.threadpool.ServerThreadPool;
+import io.kelin.rpc.constants.RpcConstants;
 import io.kelin.rpc.protocol.RpcProtocol;
 import io.kelin.rpc.protocol.enumeration.RpcStatus;
 import io.kelin.rpc.protocol.enumeration.RpcType;
@@ -14,6 +14,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
@@ -27,9 +29,14 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
 
     private final Logger logger = LoggerFactory.getLogger(RpcProviderHandler.class);
 
+    //存储 服务名称#服务版本#服务分组 与 对象实例的映射关系
     private final Map<String, Object> handlerMap;
 
-    public  RpcProviderHandler(Map<String,Object> handlerMap){
+    //采用哪种类型调用真实方法
+    private final String reflectType;
+
+    public  RpcProviderHandler(String reflectType, Map<String,Object> handlerMap){
+        this.reflectType = reflectType;
         this.handlerMap = handlerMap;
     }
 
@@ -112,10 +119,31 @@ public class RpcProviderHandler extends SimpleChannelInboundHandler<RpcProtocol<
     }
 
     //TODO 目前使用JDK动态代理方式，此处埋点
-    private Object invokeMethod(Object serviceBean, Class<?> serviceClass,String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
-        Method method = serviceClass.getMethod(methodName, parameterTypes);
-        method.setAccessible(true);
-        return method.invoke(serviceBean, parameters);
+    private Object invokeMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
+        switch (this.reflectType){
+            case RpcConstants.REFLECT_TYPE_JDK:
+                return this.invokeJDKMethod(serviceBean, serviceClass, methodName, parameterTypes, parameters);
+            case RpcConstants.REFLECT_TYPE_CGLIB:
+                return this.invokeCGLIBMethod(serviceBean, serviceClass, methodName, parameterTypes, parameters);
+            default:
+                throw new IllegalArgumentException("not support reflect type");
+        }
+    }
+
+    //jdk reflect
+    private Object invokeJDKMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
+            logger.info("use jdk reflect type invoke method...");
+            Method method = serviceClass.getMethod(methodName, parameterTypes);
+            method.setAccessible(true);
+            return method.invoke(serviceBean, parameters);
+        }
+
+        //cglib reflect
+    private Object invokeCGLIBMethod(Object serviceBean, Class<?> serviceClass, String methodName, Class<?>[] parameterTypes, Object[] parameters) throws Throwable {
+        logger.info("use cglib reflect type invoke method...");
+        FastClass serviceFastClass = FastClass.create(serviceClass);
+        FastMethod serviceFastMethod = serviceFastClass.getMethod(methodName,parameterTypes);
+        return serviceFastMethod.invoke(serviceBean, parameters);
     }
 
     @Override

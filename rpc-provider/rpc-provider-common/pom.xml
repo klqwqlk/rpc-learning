@@ -17,6 +17,12 @@
             <artifactId>rpc-codec</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.kelin</groupId>
+            <artifactId>rpc-constants</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>
