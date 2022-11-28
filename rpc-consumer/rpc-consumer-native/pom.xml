@@ -9,18 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>rpc-consumer-common</artifactId>
+    <artifactId>rpc-consumer-native</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>io.kelin</groupId>
-            <artifactId>rpc-codec</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.kelin</groupId>
-            <artifactId>rpc-proxy-jdk</artifactId>
+            <artifactId>rpc-consumer-common</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -1,9 +1,12 @@
 package io.kelin.rpc.consumer.common;
 
+import io.kelin.rpc.common.threadpool.ClientThreadPool;
 import io.kelin.rpc.consumer.common.handler.RpcConsumerHandler;
 import io.kelin.rpc.consumer.common.initializer.RpcConsumerInitializer;
 import io.kelin.rpc.protocol.RpcProtocol;
 import io.kelin.rpc.protocol.request.RpcRequest;
+import io.kelin.rpc.proxy.api.consumer.Consumer;
+import io.kelin.rpc.proxy.api.future.RPCFuture;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -20,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 1.0.0
  * @description 服务消费者
  */
-public class RpcConsumer {
+public class RpcConsumer implements Consumer {
     private final Logger logger = LoggerFactory.getLogger(RpcConsumer.class);
     private final Bootstrap bootstrap;
     private final EventLoopGroup eventLoopGroup;
@@ -49,9 +52,10 @@ public class RpcConsumer {
 
     public void close(){
         eventLoopGroup.shutdownGracefully();
+        ClientThreadPool.shutdown();
     }
 
-    public Object sendRequest(RpcProtocol<RpcRequest> protocol) throws InterruptedException {
+    public RPCFuture sendRequest(RpcProtocol<RpcRequest> protocol) throws Exception {
         //TODO 暂时写死，后续引入注册中心，从注册中心获取
         String serviceAddress = "127.0.0.1";
         int port = 27880;
@@ -66,7 +70,10 @@ public class RpcConsumer {
             handler = getRpcConsumerHandler(serviceAddress,port);;
             handlerMap.put(key,handler);
         }
-        return handler.sendRequest(protocol);
+        RpcRequest request = protocol.getBody();
+        //根据request的oneway，async选择是同步、异步还是单向请求
+        return handler.sendRequest(protocol,request.getAsync(),request.getOneway());
+
     }
 
     /**
