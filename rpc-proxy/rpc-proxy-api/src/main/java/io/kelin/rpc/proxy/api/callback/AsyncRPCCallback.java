@@ -1,4 +1,4 @@
-package io.kelin.rpc.consumer.common.callback;
+package io.kelin.rpc.proxy.api.callback;
 
 /**
  * @version 1.0.0

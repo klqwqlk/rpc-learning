@@ -1,6 +1,7 @@
 package io.kelin.rpc.consumer.common.context;
 
-import io.kelin.rpc.consumer.common.future.RPCFuture;
+
+import io.kelin.rpc.proxy.api.future.RPCFuture;
 
 /**
  * @version 1.0.0

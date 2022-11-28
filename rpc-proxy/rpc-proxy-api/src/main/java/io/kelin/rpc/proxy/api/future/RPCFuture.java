@@ -1,10 +1,10 @@
-package io.kelin.rpc.consumer.common.future;
+package io.kelin.rpc.proxy.api.future;
 
 import io.kelin.rpc.common.threadpool.ClientThreadPool;
-import io.kelin.rpc.consumer.common.callback.AsyncRPCCallback;
 import io.kelin.rpc.protocol.RpcProtocol;
 import io.kelin.rpc.protocol.request.RpcRequest;
 import io.kelin.rpc.protocol.response.RpcResponse;
+import io.kelin.rpc.proxy.api.callback.AsyncRPCCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
