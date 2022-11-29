@@ -4,6 +4,9 @@ import io.kelin.rpc.codec.RpcDecoder;
 import io.kelin.rpc.codec.RpcEncoder;
 import io.kelin.rpc.provider.common.handler.RpcProviderHandler;
 import io.kelin.rpc.provider.common.server.api.Server;
+import io.kelin.rpc.registry.api.RegistryService;
+import io.kelin.rpc.registry.api.config.RegistryConfig;
+import io.kelin.rpc.registry.zookeeper.ZookeeperRegistryService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -27,7 +30,7 @@ import java.util.Map;
  */
 public class BaseServer implements Server {
 
-    private final Logger loger = LoggerFactory.getLogger(BaseServer.class);
+    private final Logger logger = LoggerFactory.getLogger(BaseServer.class);
     //主机域名或者IP地址
     protected String host = "127.0.0.1";
     //端口号
@@ -38,14 +41,30 @@ public class BaseServer implements Server {
     //反射类型
     private String reflectType;
 
-    public BaseServer(String serverAddress, String reflectType){
+    protected RegistryService registryService;
+
+    public BaseServer(String serverAddress, String registryAddress, String registryType, String reflectType){
         if(!StringUtils.isEmpty(serverAddress)){
             String[] serverArray = serverAddress.split(":");
             this.host = serverArray[0];
             this.port = Integer.parseInt(serverArray[1]);
         }
         this.reflectType = reflectType;
+        this.registryService = this.getRegistryService(registryAddress, registryType);
     }
+
+    private RegistryService getRegistryService(String registryAddress, String registryType) {
+        //TODO 后续扩展支持SPI
+        RegistryService registryService = null;
+        try {
+            registryService = new ZookeeperRegistryService();
+            registryService.init(new RegistryConfig(registryAddress, registryType));
+        }catch (Exception e){
+            logger.error("RPC Server init error", e);
+        }
+        return registryService;
+    }
+
 
     @Override
     public void startNettyServer() {
@@ -70,10 +89,10 @@ public class BaseServer implements Server {
                 }).option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
             ChannelFuture future = bootstrap.bind(host,port).sync();
-            loger.info("Server started on {} : {}",host,port);
+            logger.info("Server started on {} : {}",host,port);
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
-           loger.error("PRC Server start error", e);
+            logger.error("PRC Server start error", e);
         }finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();

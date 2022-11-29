@@ -1,8 +1,10 @@
-package io.kelin.rpc.common.scanner.server;
+package io.kelin.rpc.provider.common.scanner;
 
 import io.kelin.rpc.annotation.RpcService;
 import io.kelin.rpc.common.ClassScanner;
 import io.kelin.rpc.common.helper.RpcServiceHelper;
+import io.kelin.rpc.protocol.meta.ServiceMeta;
+import io.kelin.rpc.registry.api.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +24,7 @@ public class RpcServiceScanner extends ClassScanner {
     /**
      * 扫描指定包下的类，并筛选使用@RpcService注解的类
      */
-    public static Map<String,Object> doScannerWithRpcServiceAnnotationFilterAndRegistryServie(/*String host,int port,*/ String scanPackage /*,RegistryService registryService*/) throws Exception {
+    public static Map<String,Object> doScannerWithRpcServiceAnnotationFilterAndRegistryServie(String host, int port, String scanPackage , RegistryService registryService) throws Exception {
         Map<String,Object> handlerMap = new HashMap<>();
         List<String> classNameList = getClassNameList(scanPackage);
         if(classNameList ==null || classNameList.isEmpty()){
@@ -35,18 +37,14 @@ public class RpcServiceScanner extends ClassScanner {
                 RpcService rpcService = clazz.getAnnotation(RpcService.class);
                 if (rpcService != null){
                     //优先使用interfaceClass, interfaceClass的name为空，再使用interfaceClassName
-//                    TODO 后续逻辑向注册中心注册服务元数据，同时向handlerMap中记录标注了RpcService注解的类实例
-
+                    ServiceMeta serviceMeta = new ServiceMeta(getServiceName(rpcService),rpcService.version(),rpcService.group(),host,port);
+                    //将元数据注册到注册中心
+                    registryService.register(serviceMeta);
                      //handlerMap中的key=服务名称#服务版本#服务分组
                      String serviceName = getServiceName(rpcService);
                      String key = RpcServiceHelper.buildServiceKey(serviceName, rpcService.version(), rpcService.group());
                      handlerMap.put(key,clazz.newInstance());
-//                    LOGGER.info("当前标注了@RpcService注解的类实例名称===>>> " + clazz.getName());
-//                    LOGGER.info("@RpcService注解上标注的属性信息如下：");
-//                    LOGGER.info("interfaceClass===>>> " + rpcService.interfaceClass().getName());
-//                    LOGGER.info("interfaceClassName===>>> " + rpcService.interfaceClassName());
-//                    LOGGER.info("version===>>> " + rpcService.version());
-//                    LOGGER.info("group===>>> " + rpcService.group());
+
                 }
             } catch (Exception e) {
                 LOGGER.error("scan classes throws exception: {}", e);

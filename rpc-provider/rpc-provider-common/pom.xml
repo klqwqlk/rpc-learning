@@ -20,9 +20,10 @@
 
         <dependency>
             <groupId>io.kelin</groupId>
-            <artifactId>rpc-constants</artifactId>
+            <artifactId>rpc-registry-zookeeper</artifactId>
             <version>${project.version}</version>
         </dependency>
+
     </dependencies>
 
 </project>

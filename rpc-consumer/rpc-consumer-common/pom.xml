@@ -23,6 +23,13 @@
             <artifactId>rpc-proxy-jdk</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.kelin</groupId>
+            <artifactId>rpc-registry-zookeeper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
     </dependencies>
 
 
